@@ -1,0 +1,21 @@
+{
+  "name": "shop-ledger",
+  "version": "1.0.0",
+  "description": "Shop Ledger — finance app for a Pani Puri & Chaat shop. Production-ready client + server.",
+  "private": true,
+  "scripts": {
+    "install:all": "npm install && npm --prefix server install && npm --prefix client install",
+    "dev": "concurrently -n server,client -c green,cyan \"npm --prefix server run dev\" \"npm --prefix client run dev\"",
+    "build": "npm --prefix server run build && npm --prefix client run build",
+    "start": "npm --prefix server run start",
+    "db:push": "npm --prefix server run db:push",
+    "db:seed": "npm --prefix server run db:seed",
+    "lint": "concurrently \"npm --prefix server run lint\" \"npm --prefix client run lint\""
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
