@@ -39,7 +39,12 @@ export function createApp(): Express {
       legacyHeaders: false,
     }),
   );
-
+app.get("/health", (_, res) => {
+  res.status(200).json({
+    status: "OK",
+    environment: process.env.NODE_ENV,
+  });
+});
   app.use("/api", routes);
 
   app.use(notFoundHandler);
