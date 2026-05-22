@@ -1,9 +1,11 @@
 import "dotenv/config";
 import { db, pool } from "../config/db.js";
-import { categoriesTable, settingsTable } from "../models/index.js";
+import { categoriesTable, settingsTable } from "./schema.js";
 import { logger } from "../utils/logger.js";
 
-const DEFAULT_CATEGORIES: Array<{ name: string; color: string }> = [
+type DefaultCategory = Pick<typeof categoriesTable.$inferInsert, "name" | "color">;
+
+const DEFAULT_CATEGORIES: DefaultCategory[] = [
   { name: "Raw Materials", color: "#E07A5F" },
   { name: "Vegetables", color: "#81B29A" },
   { name: "Spices", color: "#F2CC8F" },
@@ -17,19 +19,30 @@ const DEFAULT_CATEGORIES: Array<{ name: string; color: string }> = [
 ];
 
 async function main() {
-  logger.info("Seeding default categories…");
-  for (const c of DEFAULT_CATEGORIES) {
-    await db.insert(categoriesTable).values(c).onConflictDoNothing({ target: categoriesTable.name });
+  logger.info("Seeding default categories...");
+
+  for (const category of DEFAULT_CATEGORIES) {
+    await db
+      .insert(categoriesTable)
+      .values(category)
+      .onConflictDoNothing({ target: categoriesTable.name });
   }
 
-  logger.info("Ensuring settings row exists…");
-  await db.insert(settingsTable).values({ id: 1 }).onConflictDoNothing({ target: settingsTable.id });
+  logger.info("Ensuring settings row exists...");
+
+  await db
+    .insert(settingsTable)
+    .values({ id: 1 })
+    .onConflictDoNothing({ target: settingsTable.id });
 
   logger.info("Seed complete.");
-  await pool.end();
 }
 
-main().catch((err) => {
-  logger.error({ err }, "Seed failed");
-  process.exit(1);
-});
+main()
+  .catch((err) => {
+    logger.error({ err }, "Seed failed");
+    process.exitCode = 1;
+  })
+  .finally(async () => {
+    await pool.end();
+  });

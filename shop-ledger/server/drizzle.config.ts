@@ -6,7 +6,7 @@ if (!process.env.DATABASE_URL) {
 }
 
 export default {
-  schema: "./src/models/index.ts",
+  schema: "./src/db/schema.ts",
   out: "./src/db/migrations",
   dialect: "postgresql",
   dbCredentials: {

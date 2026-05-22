@@ -18,19 +18,50 @@ async function main() {
     logger.info(`Shop Ledger API listening on http://0.0.0.0:${env.PORT}`);
   });
 
-  const shutdown = async (signal: string) => {
+  let isShuttingDown = false;
+  const shutdown = async (signal: string, exitCode = 0) => {
+    if (isShuttingDown) return;
+    isShuttingDown = true;
+
     logger.info({ signal }, "Shutting down");
-    server.close(async () => {
+    const forceExit = setTimeout(() => {
+      logger.error({ signal }, "Forced shutdown after timeout");
+      process.exit(1);
+    }, 10_000);
+    forceExit.unref();
+
+    try {
+      if (server.listening) {
+        await new Promise<void>((resolve, reject) => {
+          server.close((err) => {
+            if (err) reject(err);
+            else resolve();
+          });
+        });
+      }
       await closeDb();
-      process.exit(0);
-    });
-    setTimeout(() => process.exit(1), 10_000).unref();
+      process.exit(exitCode);
+    } catch (err) {
+      logger.error({ err }, "Graceful shutdown failed");
+      process.exit(1);
+    } finally {
+      clearTimeout(forceExit);
+    }
   };
+
+  server.on("error", (err) => {
+    logger.fatal({ err }, "HTTP server error");
+    void shutdown("serverError", 1);
+  });
 
   process.on("SIGINT", () => void shutdown("SIGINT"));
   process.on("SIGTERM", () => void shutdown("SIGTERM"));
   process.on("unhandledRejection", (reason) => {
     logger.error({ reason }, "Unhandled rejection");
+  });
+  process.on("uncaughtException", (err) => {
+    logger.fatal({ err }, "Uncaught exception");
+    void shutdown("uncaughtException", 1);
   });
 }
 

@@ -3,7 +3,7 @@ import cors from "cors";
 import helmet from "helmet";
 import compression from "compression";
 import cookieParser from "cookie-parser";
-import pinoHttp from "pino-http";
+import { pinoHttp } from "pino-http";
 import rateLimit from "express-rate-limit";
 import { logger } from "./utils/logger.js";
 import { corsOrigins, isProduction } from "./config/env.js";
@@ -12,6 +12,7 @@ import { errorHandler, notFoundHandler } from "./middlewares/error.middleware.js
 
 export function createApp(): Express {
   const app = express();
+  const allowAnyCorsOrigin = corsOrigins.includes("*");
 
   app.disable("x-powered-by");
   app.set("trust proxy", 1);
@@ -19,8 +20,8 @@ export function createApp(): Express {
   app.use(helmet());
   app.use(
     cors({
-      origin: corsOrigins,
-      credentials: true,
+      origin: allowAnyCorsOrigin ? true : corsOrigins,
+      credentials: !allowAnyCorsOrigin,
     }),
   );
   app.use(compression());
@@ -39,12 +40,13 @@ export function createApp(): Express {
       legacyHeaders: false,
     }),
   );
-app.get("/health", (_, res) => {
-  res.status(200).json({
-    status: "OK",
-    environment: process.env.NODE_ENV,
+  app.get("/health", (_req, res) => {
+    res.status(200).json({
+      status: "OK",
+      environment: process.env.NODE_ENV,
+    });
   });
-});
+
   app.use("/api", routes);
 
   app.use(notFoundHandler);
