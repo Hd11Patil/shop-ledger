@@ -40,7 +40,7 @@ export function createApp(): Express {
       legacyHeaders: false,
     }),
   );
-  app.get("/health", (_req, res) => {
+  app.get("/", (_req, res) => {
     res.status(200).json({
       status: "OK",
       environment: process.env.NODE_ENV,
