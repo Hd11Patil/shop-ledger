@@ -94,6 +94,7 @@ The server serves the API. Deploy the client `dist/` to any static host (Netlify
    - `JWT_SECRET` — at least 32 random characters
    - `CORS_ORIGIN` — your Vercel URL **without** a trailing slash, e.g. `https://joschaatpune.vercel.app`  
      For local testing too: `https://joschaatpune.vercel.app,http://localhost:5173`
+   - `CORS_ALLOW_VERCEL_PREVIEWS=true` — allows Vercel preview deploy URLs (`*.vercel.app`)
 4. After deploy, run schema once (Render Shell or locally against production DB):  
    `npm run db:push` and optionally `npm run db:seed`
 

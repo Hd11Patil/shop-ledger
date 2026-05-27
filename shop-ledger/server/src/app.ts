@@ -6,7 +6,7 @@ import cookieParser from "cookie-parser";
 import { pinoHttp } from "pino-http";
 import rateLimit from "express-rate-limit";
 import { logger } from "./utils/logger.js";
-import { corsOrigins, isProduction, normalizeCorsOrigin } from "./config/env.js";
+import { corsOrigins, isAllowedCorsOrigin, isProduction } from "./config/env.js";
 import routes from "./routes/index.js";
 import { errorHandler, notFoundHandler } from "./middlewares/error.middleware.js";
 
@@ -30,8 +30,7 @@ export function createApp(): Express {
           return;
         }
 
-        const normalized = normalizeCorsOrigin(origin);
-        if (normalized && corsOrigins.includes(normalized)) {
+        if (isAllowedCorsOrigin(origin)) {
           callback(null, true);
           return;
         }

@@ -28,6 +28,7 @@ const envSchema = z.object({
   CORS_ORIGIN: z
     .string()
     .default("https://joschaatpune.vercel.app"),
+  CORS_ALLOW_VERCEL_PREVIEWS: booleanFromEnv.default(true),
 });
 
 const parsed = envSchema.safeParse(process.env);
@@ -59,6 +60,21 @@ export function normalizeCorsOrigin(value: string): string | null {
 export const corsOrigins = env.CORS_ORIGIN.split(",")
   .map(normalizeCorsOrigin)
   .filter((origin): origin is string => Boolean(origin));
+
+export function isAllowedCorsOrigin(origin: string): boolean {
+  const normalized = normalizeCorsOrigin(origin);
+  if (!normalized) return false;
+  if (corsOrigins.includes("*") || corsOrigins.includes(normalized)) return true;
+
+  if (!env.CORS_ALLOW_VERCEL_PREVIEWS) return false;
+
+  try {
+    const { hostname, protocol } = new URL(normalized);
+    return protocol === "https:" && hostname.endsWith(".vercel.app");
+  } catch {
+    return false;
+  }
+}
 
 if (isProduction && corsOrigins.length === 0) {
   console.error("CORS_ORIGIN must include at least one valid origin (or *) in production.");
