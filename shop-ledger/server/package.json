@@ -7,7 +7,6 @@
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "build": "tsc -p tsconfig.json",
-    "postinstall": "node ./scripts/postinstall-build.cjs",
     "start": "node --enable-source-maps dist/server.js",
     "db:push": "drizzle-kit push",
     "db:generate": "drizzle-kit generate",
