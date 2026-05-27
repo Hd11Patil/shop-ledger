@@ -92,15 +92,15 @@ The server serves the API. Deploy the client `dist/` to any static host (Netlify
    - `NODE_ENV=production`
    - `DATABASE_URL` — Postgres connection string from Render Postgres or external provider
    - `JWT_SECRET` — at least 32 random characters
-   - `CORS_ORIGIN` — your Vercel URL **without** a trailing slash, e.g. `https://your-app.vercel.app`  
-     For local testing too: `https://your-app.vercel.app,http://localhost:5173`
+   - `CORS_ORIGIN` — your Vercel URL **without** a trailing slash, e.g. `https://joschaatpune.vercel.app`  
+     For local testing too: `https://joschaatpune.vercel.app,http://localhost:5173`
 4. After deploy, run schema once (Render Shell or locally against production DB):  
    `npm run db:push` and optionally `npm run db:seed`
 
 ### Frontend (Vercel)
 
 1. Import the repo; set **Root Directory** to `shop-ledger/client`.
-2. Add environment variable **`VITE_API_URL`** = `https://<your-render-service>.onrender.com/api` (include `/api`, no trailing slash).
+2. Add environment variable **`VITE_API_URL`** = `https://shop-ledger-fv4f.onrender.com/api` (include `/api`, no trailing slash).
 3. Redeploy after changing `VITE_API_URL` (Vite bakes env vars at build time).
 
 ### Common production issues

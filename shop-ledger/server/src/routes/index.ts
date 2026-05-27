@@ -10,6 +10,15 @@ import reportRoutes from "./report.routes.js";
 
 const router = Router();
 
+router.get("/", (_req, res) => {
+  res.json({
+    status: "ok",
+    service: "shop-ledger-api",
+    message: "API is running",
+    health: "/api/healthz",
+  });
+});
+
 router.get("/healthz", (_req, res) => {
   res.json({ status: "ok", timestamp: new Date().toISOString() });
 });
