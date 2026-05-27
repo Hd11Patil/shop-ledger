@@ -33,7 +33,7 @@ services:
       PORT: 8080
       DATABASE_URL: postgres://shopledger:shopledger@postgres:5432/shop_ledger
       JWT_SECRET: ${JWT_SECRET:-shop-ledger-local-dev-secret-change-before-production}
-      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:5173}
+      CORS_ORIGIN: ${CORS_ORIGIN:-https://shop-ledger-ashy.vercel.app/login}
     ports:
       - "8080:8080"
 
@@ -42,7 +42,7 @@ services:
       context: ./client
       dockerfile: Dockerfile
       args:
-        VITE_API_URL: ${VITE_API_URL:-http://localhost:8080/api}
+        VITE_API_URL: ${VITE_API_URL:-https://shop-ledger-api.onrender.com/api}
     container_name: shop_ledger_client
     restart: unless-stopped
     depends_on:
