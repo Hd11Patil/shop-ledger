@@ -1,4 +1,5 @@
 import axios, { AxiosError, type InternalAxiosRequestConfig } from "axios";
+import { getApiBaseUrl } from "@/lib/apiBaseUrl";
 
 const TOKEN_KEY = "shop_ledger_token";
 
@@ -12,8 +13,9 @@ export function setToken(token: string | null): void {
 }
 
 export const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
+  baseURL: getApiBaseUrl(),
   withCredentials: false,
+  timeout: 30_000,
 });
 
 api.interceptors.request.use((config: InternalAxiosRequestConfig) => {

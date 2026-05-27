@@ -1,0 +1,31 @@
+# Render Blueprint — deploy backend from Render Dashboard → New → Blueprint
+# Set sync: false secrets in the Render UI after first deploy.
+
+services:
+  - type: web
+    name: shop-ledger-api
+    runtime: node
+    rootDir: shop-ledger/server
+    plan: free
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/healthz
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "8080"
+      - key: DATABASE_SSL
+        value: auto
+      - key: DATABASE_SSL_REJECT_UNAUTHORIZED
+        value: "false"
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: BCRYPT_ROUNDS
+        value: "10"
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: CORS_ORIGIN
+        sync: false

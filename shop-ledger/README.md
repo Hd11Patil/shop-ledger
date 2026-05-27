@@ -80,6 +80,38 @@ npm start
 
 The server serves the API. Deploy the client `dist/` to any static host (Netlify, Vercel, Nginx, S3 + CloudFront).
 
+## Deploy (Vercel + Render)
+
+### Backend (Render)
+
+1. Create a **Web Service** with root directory `shop-ledger/server` (or use `render.yaml` Blueprint).
+2. **Build command:** `npm ci && npm run build`  
+   **Start command:** `npm start`  
+   **Health check path:** `/api/healthz`
+3. Set environment variables (see `server/.env.example`):
+   - `NODE_ENV=production`
+   - `DATABASE_URL` — Postgres connection string from Render Postgres or external provider
+   - `JWT_SECRET` — at least 32 random characters
+   - `CORS_ORIGIN` — your Vercel URL **without** a trailing slash, e.g. `https://your-app.vercel.app`  
+     For local testing too: `https://your-app.vercel.app,http://localhost:5173`
+4. After deploy, run schema once (Render Shell or locally against production DB):  
+   `npm run db:push` and optionally `npm run db:seed`
+
+### Frontend (Vercel)
+
+1. Import the repo; set **Root Directory** to `shop-ledger/client`.
+2. Add environment variable **`VITE_API_URL`** = `https://<your-render-service>.onrender.com/api` (include `/api`, no trailing slash).
+3. Redeploy after changing `VITE_API_URL` (Vite bakes env vars at build time).
+
+### Common production issues
+
+| Symptom | Fix |
+| -------- | ----- |
+| CORS error in browser | Set `CORS_ORIGIN` on Render to the exact Vercel origin (no trailing `/`). |
+| API calls go to wrong host | Set `VITE_API_URL` on Vercel and redeploy. |
+| 401 after login | Ensure `JWT_SECRET` is set and stable across restarts. |
+| DB connection fails | Use `DATABASE_SSL=auto` (default) for hosted Postgres. |
+
 ## Docker
 
 The whole stack (Postgres + server + client) can be brought up with:

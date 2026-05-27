@@ -25,7 +25,7 @@ const envSchema = z.object({
   JWT_SECRET: z.string().min(32, "JWT_SECRET must be at least 32 characters"),
   JWT_EXPIRES_IN: z.string().default("7d"),
   BCRYPT_ROUNDS: z.coerce.number().int().min(8).max(15).default(10),
-  CORS_ORIGIN: z.string().default("https://joshchat-ashy.vercel.app/"),
+  CORS_ORIGIN: z.string().default("https://joschaatpune.vercel.app"),
 });
 
 const parsed = envSchema.safeParse(process.env);
@@ -39,6 +39,30 @@ export const env = parsed.data;
 export const isProduction = env.NODE_ENV === "production";
 export const isDevelopment = env.NODE_ENV === "development";
 
+/** Normalize browser Origin values (no trailing slash). */
+export function normalizeCorsOrigin(value: string): string | null {
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  if (trimmed === "*") return "*";
+
+  try {
+    const url = new URL(trimmed);
+    if (!["http:", "https:"].includes(url.protocol)) return null;
+    return url.origin;
+  } catch {
+    return null;
+  }
+}
+
 export const corsOrigins = env.CORS_ORIGIN.split(",")
-  .map((s) => s.trim())
-  .filter(Boolean);
+  .map(normalizeCorsOrigin)
+  .filter((origin): origin is string => Boolean(origin));
+
+if (isProduction && corsOrigins.length === 0) {
+  console.error("CORS_ORIGIN must include at least one valid origin (or *) in production.");
+  process.exit(1);
+}
+
+if (isProduction && corsOrigins.includes("*")) {
+  console.warn("CORS_ORIGIN=* allows any origin. Prefer explicit Vercel URLs in production.");
+}

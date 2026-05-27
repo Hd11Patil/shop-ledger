@@ -13,9 +13,24 @@ export default defineConfig({
   server: {
     host: true,
     port: 5173,
+    proxy: {
+      "/api": {
+        target: "https://shop-ledger-fv4f.onrender.com/api",
+        changeOrigin: true,
+      },
+    },
   },
   build: {
     outDir: "dist",
-    sourcemap: true,
+    sourcemap: false,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ["react", "react-dom", "@tanstack/react-query"],
+          charts: ["recharts"],
+          pdf: ["jspdf", "jspdf-autotable"],
+        },
+      },
+    },
   },
 });

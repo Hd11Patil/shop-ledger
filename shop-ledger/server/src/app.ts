@@ -6,7 +6,7 @@ import cookieParser from "cookie-parser";
 import { pinoHttp } from "pino-http";
 import rateLimit from "express-rate-limit";
 import { logger } from "./utils/logger.js";
-import { corsOrigins, isProduction } from "./config/env.js";
+import { corsOrigins, isProduction, normalizeCorsOrigin } from "./config/env.js";
 import routes from "./routes/index.js";
 import { errorHandler, notFoundHandler } from "./middlewares/error.middleware.js";
 
@@ -17,11 +17,31 @@ export function createApp(): Express {
   app.disable("x-powered-by");
   app.set("trust proxy", 1);
 
-  app.use(helmet());
+  app.use(
+    helmet({
+      crossOriginResourcePolicy: { policy: "cross-origin" },
+    }),
+  );
   app.use(
     cors({
-      origin: allowAnyCorsOrigin ? true : corsOrigins,
-      credentials: !allowAnyCorsOrigin,
+      origin(origin, callback) {
+        if (allowAnyCorsOrigin || !origin) {
+          callback(null, true);
+          return;
+        }
+
+        const normalized = normalizeCorsOrigin(origin);
+        if (normalized && corsOrigins.includes(normalized)) {
+          callback(null, true);
+          return;
+        }
+
+        callback(null, false);
+      },
+      credentials: false,
+      methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+      allowedHeaders: ["Content-Type", "Authorization"],
+      optionsSuccessStatus: 204,
     }),
   );
   app.use(compression());
